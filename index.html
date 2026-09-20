@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#0a0f16">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="A four-week rowing programme with live RP20 pace and watt targets.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a0f16'/%3E%3Cpath d='M15 43 45 13l6 6-30 30z' fill='%232dd4bf'/%3E%3Cpath d='m12 46 6-6 6 6-6 6z' fill='%2399f6e4'/%3E%3C/svg%3E">
+  <title>RP20 Rowing Programme</title>
+  <style>
+    :root {
+      --bg:#0a0f16; --surface:#121a24; --surface-2:#192432; --surface-3:#223043;
+      --line:#29384a; --text:#eef5f7; --muted:#93a3b5; --faint:#647487;
+      --accent:#2dd4bf; --accent-2:#67e8f9; --green:#22c55e; --blue:#60a5fa;
+      --yellow:#fbbf24; --orange:#fb923c; --red:#fb7185; --purple:#c084fc;
+      --radius:14px; --safe-bottom:env(safe-area-inset-bottom,0px);
+    }
+    * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+    html { color-scheme:dark; }
+    body {
+      min-height:100vh; overflow-x:hidden; padding-bottom:calc(78px + var(--safe-bottom));
+      background:
+        radial-gradient(circle at 10% -10%, rgba(45,212,191,.12), transparent 34rem),
+        var(--bg);
+      color:var(--text); font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+    button,input { font:inherit; }
+    button { color:inherit; }
+    .condensed { font-family:"Arial Narrow","Roboto Condensed",Impact,sans-serif; letter-spacing:.025em; }
+    .shell { width:min(100%,760px); margin:0 auto; }
+
+    .topbar {
+      position:sticky; top:0; z-index:50; padding:12px 14px 0;
+      background:rgba(10,15,22,.94); border-bottom:1px solid var(--line); backdrop-filter:blur(16px);
+    }
+    .toprow { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .brand { display:flex; align-items:center; gap:9px; min-width:0; }
+    .brand-mark {
+      width:32px; height:32px; border-radius:10px; display:grid; place-items:center;
+      background:linear-gradient(145deg,rgba(45,212,191,.25),rgba(103,232,249,.08));
+      border:1px solid rgba(45,212,191,.32); font-size:17px;
+    }
+    .brand h1 { font-size:18px; line-height:1; font-weight:900; white-space:nowrap; }
+    .brand h1 span { color:var(--accent); }
+    .brand small { display:block; margin-top:3px; color:var(--faint); font-size:10px; font-weight:700; letter-spacing:.08em; }
+    .rp-badge {
+      flex:0 0 auto; padding:6px 10px; border-radius:999px; cursor:pointer;
+      border:1px solid rgba(45,212,191,.34); background:rgba(45,212,191,.11); color:var(--accent);
+      font-size:13px; font-weight:850; line-height:1.05; text-align:right;
+    }
+    .rp-badge small { display:block; margin-top:2px; color:#b8fff4; font-size:10px; font-weight:650; }
+    .progress-track { height:3px; margin-top:10px; overflow:hidden; border-radius:2px; background:var(--line); }
+    .progress-fill { height:100%; width:0; border-radius:2px; transition:width .35s ease; background:linear-gradient(90deg,var(--accent),var(--accent-2)); }
+    .tabs {
+      display:flex; gap:6px; padding:9px 0 10px; overflow-x:auto; scrollbar-width:none;
+    }
+    .tabs::-webkit-scrollbar { display:none; }
+    .tab {
+      flex:0 0 auto; padding:6px 13px; border:1px solid var(--line); border-radius:999px;
+      background:var(--surface); color:var(--muted); cursor:pointer; font-size:13px; font-weight:800;
+    }
+    .tab.active { border-color:var(--accent); background:var(--accent); color:#062923; }
+    .tab.complete:not(.active) { border-color:rgba(34,197,94,.6); color:#75e998; }
+
+    .page { display:none; padding:14px; }
+    .page.active { display:block; }
+    .hero {
+      padding:16px; border:1px solid rgba(45,212,191,.24); border-radius:var(--radius);
+      background:linear-gradient(135deg,rgba(45,212,191,.11),rgba(96,165,250,.06) 65%,var(--surface));
+      box-shadow:0 18px 60px rgba(0,0,0,.18);
+    }
+    .eyebrow { color:var(--accent); font-size:11px; font-weight:850; letter-spacing:.12em; text-transform:uppercase; }
+    .hero h2 { margin-top:5px; font-size:25px; line-height:1.02; font-weight:900; }
+    .hero p { margin-top:7px; color:var(--muted); font-size:13px; line-height:1.55; }
+    .benchmark {
+      display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:14px;
+    }
+    .benchmark div { padding:10px 12px; border-radius:10px; background:rgba(255,255,255,.045); border:1px solid rgba(255,255,255,.055); }
+    .benchmark span { display:block; color:var(--faint); font-size:10px; font-weight:750; text-transform:uppercase; letter-spacing:.08em; }
+    .benchmark strong { display:block; margin-top:2px; font-size:20px; color:var(--text); }
+    .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin:12px 0 17px; }
+    .stat { padding:12px 7px; text-align:center; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); }
+    .stat strong { display:block; color:var(--accent-2); font-size:27px; line-height:1; font-weight:900; }
+    .stat span { display:block; margin-top:4px; color:var(--faint); font-size:10px; }
+    .section-title { margin:18px 0 10px; color:var(--faint); font-size:11px; font-weight:850; letter-spacing:.12em; text-transform:uppercase; }
+    .week-list { display:grid; gap:8px; }
+    .week-row {
+      display:grid; grid-template-columns:42px 1fr 58px; gap:10px; align-items:center; padding:11px 12px;
+      border:1px solid var(--line); border-radius:11px; background:var(--surface); cursor:pointer;
+    }
+    .week-row:active { background:var(--surface-2); }
+    .week-num { color:var(--faint); font-size:20px; font-weight:900; }
+    .week-info strong { display:block; font-size:13px; }
+    .week-info span { display:block; margin-top:2px; color:var(--faint); font-size:11px; }
+    .mini-track { height:4px; overflow:hidden; border-radius:3px; background:var(--line); }
+    .mini-fill { height:100%; background:var(--accent); }
+    .notice {
+      margin-top:14px; padding:11px 12px; border:1px solid rgba(96,165,250,.22); border-radius:10px;
+      background:rgba(96,165,250,.06); color:var(--muted); font-size:12px; line-height:1.55;
+    }
+    .notice strong { color:var(--accent-2); }
+    .reset {
+      width:100%; margin-top:14px; padding:12px; border:1px solid rgba(251,113,133,.3); border-radius:11px;
+      background:rgba(251,113,133,.08); color:var(--red); cursor:pointer; font-weight:750;
+    }
+
+    .week-header { margin-bottom:13px; padding:14px; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); }
+    .phase-pill { display:inline-flex; padding:4px 9px; border-radius:999px; background:rgba(45,212,191,.1); color:var(--accent); font-size:10px; font-weight:850; letter-spacing:.08em; text-transform:uppercase; }
+    .week-header h2 { margin-top:7px; font-size:23px; font-weight:900; }
+    .week-header p { margin-top:4px; color:var(--muted); font-size:12px; line-height:1.5; }
+    .week-meta { display:flex; flex-wrap:wrap; gap:7px; margin-top:10px; }
+    .week-meta span { padding:5px 8px; border-radius:7px; background:var(--surface-2); color:var(--muted); font-size:11px; }
+    .week-meta strong { color:var(--text); }
+
+    .session { margin-bottom:10px; overflow:hidden; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); }
+    .session.done { opacity:.5; }
+    .session.done .session-title { color:var(--faint); text-decoration:line-through; }
+    .session-head { display:flex; align-items:flex-start; gap:11px; padding:13px; }
+    .check {
+      width:29px; height:29px; flex:0 0 auto; display:grid; place-items:center; border:2px solid var(--line); border-radius:50%;
+      background:transparent; cursor:pointer; font-weight:900;
+    }
+    .done .check { border-color:var(--green); background:var(--green); color:#06230f; }
+    .session-copy { flex:1; min-width:0; }
+    .session-day { color:var(--faint); font-size:10px; font-weight:850; letter-spacing:.1em; text-transform:uppercase; }
+    .session-title { margin-top:2px; font-size:18px; line-height:1.1; font-weight:900; }
+    .pills { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+    .pill { display:inline-flex; align-items:center; gap:4px; padding:4px 8px; border-radius:7px; font-size:11px; font-weight:750; }
+    .pill.duration { background:rgba(255,255,255,.06); color:var(--muted); }
+    .pill.z2 { background:rgba(96,165,250,.12); color:var(--blue); }
+    .pill.z3 { background:rgba(251,191,36,.12); color:var(--yellow); }
+    .pill.low { background:rgba(192,132,252,.12); color:var(--purple); }
+    .pill.threshold { background:rgba(251,146,60,.12); color:var(--orange); }
+    .pill.test { background:rgba(251,113,133,.12); color:var(--red); }
+    .session-note { margin-top:7px; color:var(--muted); font-size:12px; line-height:1.45; }
+    .detail-toggle {
+      width:100%; display:flex; align-items:center; justify-content:space-between; padding:10px 13px;
+      border:0; border-top:1px solid var(--line); background:transparent; color:var(--muted); cursor:pointer;
+      font-size:12px; font-weight:750; text-align:left;
+    }
+    .detail-toggle .arrow { transition:transform .2s; }
+    .detail-toggle.open .arrow { transform:rotate(180deg); }
+    .details { display:none; padding:11px 12px 13px; border-top:1px solid var(--line); background:var(--surface-2); }
+    .details.open { display:block; }
+    .segment { display:grid; grid-template-columns:60px 1fr; gap:10px; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.055); }
+    .segment:last-child { border-bottom:0; }
+    .segment-time { font-size:14px; font-weight:850; }
+    .segment-main { min-width:0; }
+    .segment-target { font-size:15px; font-weight:850; color:var(--text); }
+    .segment-meta { margin-top:2px; color:var(--muted); font-size:11px; line-height:1.4; }
+    .repeat {
+      margin:7px 0; padding:8px 10px 4px; border:1px solid rgba(45,212,191,.18); border-radius:10px; background:rgba(45,212,191,.035);
+    }
+    .repeat-label { margin-bottom:2px; color:var(--accent); font-size:10px; font-weight:850; letter-spacing:.09em; text-transform:uppercase; }
+    .test-update {
+      width:100%; margin-top:10px; padding:10px; border:1px solid rgba(45,212,191,.35); border-radius:9px;
+      background:rgba(45,212,191,.09); color:var(--accent); cursor:pointer; font-size:12px; font-weight:850;
+    }
+
+    .zone-card {
+      display:grid; grid-template-columns:52px 1fr auto; gap:10px; align-items:center; margin-bottom:8px; padding:12px;
+      border:1px solid var(--line); border-left:3px solid var(--zone); border-radius:var(--radius); background:var(--surface);
+    }
+    .zone-code { color:var(--zone); font-size:22px; font-weight:900; }
+    .zone-copy strong { display:block; font-size:14px; }
+    .zone-copy span { display:block; margin-top:2px; color:var(--muted); font-size:11px; }
+    .zone-values { text-align:right; }
+    .zone-values strong { display:block; font-size:13px; }
+    .zone-values span { display:block; margin-top:2px; color:var(--muted); font-size:10px; }
+    .power-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:8px 1px; border-bottom:1px solid var(--line); }
+    .power-row span { color:var(--muted); font-size:12px; }
+    .power-row strong { text-align:right; font-size:13px; }
+
+    .bottom-nav {
+      position:fixed; left:0; right:0; bottom:0; z-index:60; display:flex; padding-bottom:var(--safe-bottom);
+      border-top:1px solid var(--line); background:rgba(10,15,22,.95); backdrop-filter:blur(16px);
+    }
+    .nav-button { flex:1; padding:10px 7px; border:0; background:transparent; color:var(--faint); cursor:pointer; font-size:10px; font-weight:650; }
+    .nav-button span { display:block; margin-bottom:2px; font-size:19px; }
+    .nav-button.active { color:var(--accent); }
+
+    .modal-overlay { display:none; position:fixed; inset:0; z-index:100; align-items:flex-end; justify-content:center; background:rgba(0,0,0,.78); padding-bottom:var(--safe-bottom); }
+    .modal-overlay.open { display:flex; }
+    .modal { width:100%; max-width:520px; padding:20px 17px; border:1px solid var(--line); border-radius:22px 22px 0 0; background:var(--surface); }
+    .modal h3 { font-size:23px; font-weight:900; }
+    .modal p { margin-top:5px; color:var(--muted); font-size:12px; line-height:1.5; }
+    .split-inputs { display:grid; grid-template-columns:1fr auto 1fr; gap:8px; align-items:end; margin:16px 0 10px; }
+    .input-group label { display:block; margin-bottom:5px; color:var(--faint); font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:.08em; }
+    .input-group input {
+      width:100%; padding:11px; border:1px solid var(--line); border-radius:10px; outline:0; background:var(--surface-2);
+      color:var(--text); font-size:28px; font-weight:900; text-align:center; appearance:textfield;
+    }
+    .input-group input:focus { border-color:var(--accent); }
+    .colon { padding-bottom:10px; color:var(--muted); font-size:26px; font-weight:900; }
+    .quick-buttons { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+    .quick-buttons button { padding:9px 4px; border:1px solid var(--line); border-radius:8px; background:var(--surface-2); color:var(--muted); cursor:pointer; font-size:12px; font-weight:750; }
+    .preview { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; margin:12px 0; }
+    .preview div { padding:9px 5px; border-radius:9px; background:var(--surface-2); text-align:center; }
+    .preview span { display:block; color:var(--faint); font-size:9px; text-transform:uppercase; }
+    .preview strong { display:block; margin-top:2px; font-size:13px; }
+    .modal-actions { display:grid; grid-template-columns:1fr 2fr; gap:8px; }
+    .modal-actions button { padding:12px; border-radius:10px; cursor:pointer; font-weight:800; }
+    .cancel { border:1px solid var(--line); background:var(--surface-2); color:var(--muted); }
+    .save-button { border:0; background:var(--accent); color:#052a24; }
+
+    @media (min-width:700px) {
+      .page { padding:18px 0; }
+      .topbar { padding-left:0; padding-right:0; }
+      .bottom-nav { left:50%; width:760px; transform:translateX(-50%); border-left:1px solid var(--line); border-right:1px solid var(--line); }
+      .modal-overlay { align-items:center; padding:20px; }
+      .modal { border-radius:20px; }
+    }
+    @media (max-width:380px) {
+      .brand small { display:none; }
+      .brand h1 { font-size:16px; }
+      .zone-card { grid-template-columns:43px 1fr; }
+      .zone-values { grid-column:2; text-align:left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="toprow">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">◢</div>
+          <div>
+            <h1 class="condensed"><span>RP20</span> ROWING BLOCK</h1>
+            <small>4 WEEKS · MONDAY–FRIDAY</small>
+          </div>
+        </div>
+        <button class="rp-badge" id="rpBadge" type="button" onclick="openRP20()" aria-label="Update RP20"></button>
+      </div>
+      <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="globalProgress"></div></div>
+      <nav class="tabs" aria-label="Programme sections">
+        <button class="tab active" data-page="home" onclick="go('home',this)">Home</button>
+        <button class="tab" data-page="zones" onclick="go('zones',this)">Zones</button>
+        <button class="tab" data-page="w1" onclick="go('w1',this)">W1</button>
+        <button class="tab" data-page="w2" onclick="go('w2',this)">W2</button>
+        <button class="tab" data-page="w3" onclick="go('w3',this)">W3</button>
+        <button class="tab" data-page="w4" onclick="go('w4',this)">W4</button>
+      </nav>
+    </header>
+
+    <main>
+      <section class="page active" id="page-home">
+        <div class="hero">
+          <div class="eyebrow">Current training reference</div>
+          <h2 class="condensed">Four-week erg development block</h2>
+          <p>Tempo-led weekday training with low-rate power, threshold work and two 30R20 tests. Every split updates from your current RP20.</p>
+          <div class="benchmark">
+            <div><span>RP20 split</span><strong class="condensed" id="homeSplit"></strong></div>
+            <div><span>RP20 power</span><strong class="condensed" id="homeWatts"></strong></div>
+          </div>
+        </div>
+        <div class="stats">
+          <div class="stat"><strong class="condensed" id="doneCount">0</strong><span>Sessions done</span></div>
+          <div class="stat"><strong class="condensed" id="minutesDone">0</strong><span>Minutes banked</span></div>
+          <div class="stat"><strong class="condensed" id="percentDone">0%</strong><span>Complete</span></div>
+        </div>
+        <div class="section-title">Weekly overview</div>
+        <div class="week-list" id="weekList"></div>
+        <div class="notice"><strong>RP20 rule:</strong> percentages are applied to watts, then converted to pace. After each Friday 30R20, tap the RP20 badge and enter the new average split.</div>
+        <button class="reset" type="button" onclick="resetProgress()">Reset programme progress</button>
+      </section>
+
+      <section class="page" id="page-zones">
+        <div class="section-title">RP20 training zones</div>
+        <div class="notice" style="margin:0 0 12px">Paces and watts update immediately when RP20 changes. Stroke rate remains a separate target and is shown inside every session.</div>
+        <div id="zoneGrid"></div>
+        <div class="section-title">Power levels used in this block</div>
+        <div id="keyPowers"></div>
+      </section>
+
+      <div id="weekPages"></div>
+    </main>
+  </div>
+
+  <nav class="bottom-nav" aria-label="Primary navigation">
+    <button class="nav-button active" id="nav-home" onclick="go('home')"><span>⌂</span>Home</button>
+    <button class="nav-button" id="nav-zones" onclick="go('zones')"><span>◫</span>Zones</button>
+    <button class="nav-button" id="nav-next" onclick="goNext()"><span>→</span>Next</button>
+  </nav>
+
+  <div class="modal-overlay" id="rpModal" onclick="closeRP20(event)">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="rpTitle" onclick="event.stopPropagation()">
+      <h3 class="condensed" id="rpTitle">Update RP20</h3>
+      <p>Enter your average 500 m split from the most recent 30R20. The app converts it to watts and recalculates every workout.</p>
+      <div class="split-inputs">
+        <div class="input-group"><label for="rpMin">Minutes</label><input id="rpMin" type="number" min="1" max="3" inputmode="numeric" oninput="updateRPPreview()"></div>
+        <div class="colon">:</div>
+        <div class="input-group"><label for="rpSec">Seconds</label><input id="rpSec" type="number" min="0" max="59.9" step="0.1" inputmode="decimal" oninput="updateRPPreview()"></div>
+      </div>
+      <div class="quick-buttons">
+        <button type="button" onclick="adjustSplit(-1)">−1.0 s</button>
+        <button type="button" onclick="adjustSplit(-.5)">−0.5 s</button>
+        <button type="button" onclick="adjustSplit(.5)">+0.5 s</button>
+        <button type="button" onclick="adjustSplit(1)">+1.0 s</button>
+      </div>
+      <div class="preview" id="rpPreview"></div>
+      <div class="modal-actions">
+        <button class="cancel" type="button" onclick="closeRP20()">Cancel</button>
+        <button class="save-button" type="button" onclick="saveRP20()">Save and update plan</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'rowing_rp20_programme_v1';
+    const DEFAULT_SPLIT_SECONDS = 116;
+    let state = { rp20Watts: wattsFromSplit(DEFAULT_SPLIT_SECONDS), done: {} };
+
+    const P = (minutes, pct, rate, label='') => ({type:'step', minutes, pct, rate, label});
+    const MAX = (minutes, rate, label='Maximum sustainable effort') => ({type:'max', minutes, rate, label});
+    const R = (reps, steps) => ({type:'repeat', reps, steps});
+
+    const PROGRAM = [
+      {
+        id:'w1', week:1, label:'Establish the rhythm', subtitle:'Introduce consistent tempo work, low-rate power and controlled threshold.',
+        sessions:[
+          {id:'w1-mon',day:'Monday',type:'z3',title:'Zone 3 tempo',total:52,note:'Controlled tempo. Finish with the same stroke quality you started with.',steps:[P(8,65,18,'Warm-up'),R(3,[P(10,82,20,'Tempo'),P(2,60,18,'Active recovery')]),P(8,60,18,'Cool-down')]},
+          {id:'w1-tue',day:'Tuesday',type:'z2',title:'Zone 2 aerobic',total:50,note:'Optional gym substitution if you have access; do not add the gym on top.',steps:[P(5,60,18,'Warm-up'),P(40,72,18,'Continuous aerobic'),P(5,60,18,'Cool-down')]},
+          {id:'w1-wed',day:'Wednesday',type:'low',title:'Zone 3 low-rate power',total:54,note:'Drive firmly through the legs without opening the back early.',steps:[P(10,65,18,'Warm-up'),R(4,[P(7,85,18,'Low-rate tempo'),P(2,60,18,'Active recovery')]),P(8,60,18,'Cool-down')]},
+          {id:'w1-thu',day:'Thursday',type:'z3',title:'Zone 3 density',total:56,note:'This is the preferred optional rest day if rowing-specific soreness is building.',steps:[P(8,65,18,'Warm-up'),R(2,[P(18,84,22,'Tempo'),P(3,60,18,'Active recovery')]),P(6,60,18,'Cool-down')]},
+          {id:'w1-fri',day:'Friday',type:'threshold',title:'Threshold intervals',total:55,note:'Keep the first three repetitions repeatable; earn the right to press the fourth.',steps:[P(8,65,18,'Warm-up'),P(4,80,20,'Build'),R(4,[P(5,98,24,'Threshold'),P(2,60,18,'Active recovery')]),P(15,60,18,'Cool-down')]}
+        ]
+      },
+      {
+        id:'w2', week:2, label:'Lift the density', subtitle:'Progress the tempo load, then establish a measured RP20 on Friday.',
+        sessions:[
+          {id:'w2-mon',day:'Monday',type:'z3',title:'Zone 3 progression',total:57,note:'Longer blocks, still controlled.',steps:[P(8,65,18,'Warm-up'),R(3,[P(12,84,20,'Tempo'),P(2,60,18,'Active recovery')]),P(7,60,18,'Cool-down')]},
+          {id:'w2-tue',day:'Tuesday',type:'z2',title:'Zone 2 aerobic',total:55,note:'Optional gym substitution if available. Avoid unfamiliar heavy lifting before the test.',steps:[P(5,60,18,'Warm-up'),P(45,73,18,'Continuous aerobic'),P(5,60,18,'Cool-down')]},
+          {id:'w2-wed',day:'Wednesday',type:'low',title:'Zone 3 low-rate power',total:56,note:'Strong connection at the catch; do not turn the rate-18 work into a back exercise.',steps:[P(10,65,18,'Warm-up'),R(3,[P(10,87,18,'Low-rate tempo'),P(3,60,18,'Active recovery')]),P(7,60,18,'Cool-down')]},
+          {id:'w2-thu',day:'Thursday',type:'z3',title:'30R20 primer',total:46,note:'Omit this and rest if carrying fatigue. Friday is the priority.',steps:[P(8,65,18,'Warm-up'),R(2,[P(12,82,20,'Controlled tempo'),P(3,60,18,'Active recovery')]),P(8,60,18,'Cool-down')]},
+          {id:'w2-fri',day:'Friday',type:'test',title:'30R20 test',total:60,note:'Rate capped at 20. Update RP20 using your average split immediately afterward.',steps:[P(6,65,18,'Warm-up'),P(3,80,20,'Build'),P(2,60,18,'Easy'),P(2,95,20,'Test-pace preparation'),P(2,60,18,'Easy'),MAX(30,20),P(15,60,18,'Cool-down')]}
+        ]
+      },
+      {
+        id:'w3', week:3, label:'Absorb and progress', subtitle:'Use the new RP20, recover first, then return to tempo and threshold work.',
+        sessions:[
+          {id:'w3-mon',day:'Monday',type:'z2',title:'Zone 2 recovery',total:45,note:'Use the updated RP20 from Friday. Keep this genuinely comfortable.',steps:[P(5,60,18,'Warm-up'),P(35,68,18,'Recovery aerobic'),P(5,60,18,'Cool-down')]},
+          {id:'w3-tue',day:'Tuesday',type:'z3',title:'Zone 3 intervals',total:58,note:'Firm but sustainable pressure throughout all four repetitions.',steps:[P(8,65,18,'Warm-up'),R(4,[P(9,85,20,'Tempo'),P(2,60,18,'Active recovery')]),P(6,60,18,'Cool-down')]},
+          {id:'w3-wed',day:'Wednesday',type:'low',title:'Zone 3 low-rate power',total:50,note:'Prioritise length and acceleration at rate 18.',steps:[P(10,65,18,'Warm-up'),R(4,[P(6,83,18,'Low-rate tempo'),P(2,60,18,'Active recovery')]),P(8,60,18,'Cool-down')]},
+          {id:'w3-thu',day:'Thursday',type:'z3',title:'Zone 3 reduced',total:46,note:'Preferred optional rest day. Keep it light enough to protect Friday.',steps:[P(8,65,18,'Warm-up'),R(2,[P(12,82,20,'Controlled tempo'),P(3,60,18,'Active recovery')]),P(8,60,18,'Cool-down')]},
+          {id:'w3-fri',day:'Friday',type:'threshold',title:'Threshold progression',total:58,note:'Higher-rate work, but the power and technique should remain controlled.',steps:[P(8,65,18,'Warm-up'),P(4,80,20,'Build'),R(3,[P(8,102,24,'Threshold'),P(3,60,18,'Active recovery')]),P(13,60,18,'Cool-down')]}
+        ]
+      },
+      {
+        id:'w4', week:4, label:'Consolidate and retest', subtitle:'Finish the block with the strongest low-rate work and a second 30R20.',
+        sessions:[
+          {id:'w4-mon',day:'Monday',type:'z2',title:'Zone 2 aerobic',total:45,note:'A controlled start to test week.',steps:[P(5,60,18,'Warm-up'),P(35,70,18,'Continuous aerobic'),P(5,60,18,'Cool-down')]},
+          {id:'w4-tue',day:'Tuesday',type:'z3',title:'Zone 3 progression',total:58,note:'Stay patient through the longer repetitions.',steps:[P(8,65,18,'Warm-up'),R(3,[P(13,86,22,'Tempo'),P(2,60,18,'Active recovery')]),P(5,60,18,'Cool-down')]},
+          {id:'w4-wed',day:'Wednesday',type:'low',title:'Zone 3 low-rate power',total:52,note:'The hardest low-rate session of the block; maintain posture throughout.',steps:[P(10,65,18,'Warm-up'),R(4,[P(7,88,18,'Low-rate tempo'),P(2,60,18,'Active recovery')]),P(6,60,18,'Cool-down')]},
+          {id:'w4-thu',day:'Thursday',type:'z3',title:'30R20 primer',total:40,note:'Omit this and rest if needed. Do not chase extra fatigue before Friday.',steps:[P(8,65,18,'Warm-up'),R(2,[P(10,80,20,'Controlled tempo'),P(3,60,18,'Active recovery')]),P(6,60,18,'Cool-down')]},
+          {id:'w4-fri',day:'Friday',type:'test',title:'30R20 retest',total:60,note:'Rate capped at 20. Update RP20 again for the next block.',steps:[P(6,65,18,'Warm-up'),P(3,80,20,'Build'),P(2,60,18,'Easy'),P(2,95,20,'Test-pace preparation'),P(2,60,18,'Easy'),MAX(30,20),P(15,60,18,'Cool-down')]}
+        ]
+      }
+    ];
+
+    const TYPE = {
+      z2:{label:'ZONE 2',className:'z2'},
+      z3:{label:'ZONE 3',className:'z3'},
+      low:{label:'LOW RATE',className:'low'},
+      threshold:{label:'THRESHOLD',className:'threshold'},
+      test:{label:'30R20 TEST',className:'test'}
+    };
+
+    function wattsFromSplit(splitSeconds) {
+      return 2.8 / Math.pow(splitSeconds / 500, 3);
+    }
+    function splitFromWatts(watts) {
+      return 500 * Math.cbrt(2.8 / watts);
+    }
+    function targetWatts(pct) {
+      return state.rp20Watts * pct / 100;
+    }
+    function formatSplit(seconds) {
+      const minutes = Math.floor(seconds / 60);
+      let secs = (seconds - minutes * 60).toFixed(1);
+      if (Number(secs) >= 60) return `${minutes + 1}:00.0`;
+      return `${minutes}:${secs.padStart(4,'0')}`;
+    }
+    function formatDuration(minutes) {
+      return `${String(Math.floor(minutes)).padStart(2,'0')}:00`;
+    }
+    function totalSessions() {
+      return PROGRAM.reduce((sum,w)=>sum+w.sessions.length,0);
+    }
+    function allSessions() {
+      return PROGRAM.flatMap(w=>w.sessions);
+    }
+    function loadState() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (saved && Number(saved.rp20Watts) > 80 && Number(saved.rp20Watts) < 800) {
+          state.rp20Watts = Number(saved.rp20Watts);
+          state.done = saved.done || {};
+        }
+      } catch (_) {}
+    }
+    function persist() {
+      try { localStorage.setItem(STORAGE_KEY,JSON.stringify(state)); } catch (_) {}
+    }
+    function targetMarkup(step) {
+      if (step.type === 'max') {
+        return `<div class="segment"><div class="segment-time condensed">${formatDuration(step.minutes)}</div><div class="segment-main"><div class="segment-target">Maximum sustainable</div><div class="segment-meta">r${step.rate} · Current RP20 ${formatSplit(splitFromWatts(state.rp20Watts))}/500 m · aim to improve</div></div></div>`;
+      }
+      const watts = targetWatts(step.pct);
+      const split = splitFromWatts(watts);
+      return `<div class="segment"><div class="segment-time condensed">${formatDuration(step.minutes)}</div><div class="segment-main"><div class="segment-target">${formatSplit(split)} /500 m</div><div class="segment-meta">${Math.round(watts)} W · ${step.pct}% RP20 · r${step.rate}${step.label ? ` · ${step.label}` : ''}</div></div></div>`;
+    }
+    function renderSteps(steps) {
+      return steps.map(step => {
+        if (step.type === 'repeat') {
+          return `<div class="repeat"><div class="repeat-label">${step.reps} rounds</div>${step.steps.map(targetMarkup).join('')}</div>`;
+        }
+        return targetMarkup(step);
+      }).join('');
+    }
+    function renderSession(session) {
+      const type = TYPE[session.type];
+      const done = !!state.done[session.id];
+      return `<article class="session ${done?'done':''}" id="card-${session.id}">
+        <div class="session-head">
+          <button class="check" type="button" onclick="toggleDone('${session.id}')" aria-label="${done?'Mark incomplete':'Mark complete'}">${done?'✓':''}</button>
+          <div class="session-copy">
+            <div class="session-day">${session.day}</div>
+            <div class="session-title condensed">${session.title}</div>
+            <div class="pills"><span class="pill ${type.className}">${type.label}</span><span class="pill duration">${session.total} min</span></div>
+            <div class="session-note">${session.note}</div>
+          </div>
+        </div>
+        <button class="detail-toggle" id="toggle-${session.id}" type="button" onclick="toggleDetails('${session.id}')" aria-expanded="false"><span>Workout details</span><span class="arrow">⌄</span></button>
+        <div class="details" id="details-${session.id}">${renderSteps(session.steps)}${session.type==='test'?`<button class="test-update" type="button" onclick="openRP20()">Update RP20 from test result</button>`:''}</div>
+      </article>`;
+    }
+    function renderWeekPages() {
+      const container = document.getElementById('weekPages');
+      container.innerHTML = PROGRAM.map(week => {
+        const minutes = week.sessions.reduce((s,x)=>s+x.total,0);
+        return `<section class="page" id="page-${week.id}">
+          <div class="week-header"><span class="phase-pill">${week.label}</span><h2 class="condensed">Week ${week.week}</h2><p>${week.subtitle}</p><div class="week-meta"><span><strong>5</strong> sessions</span><span><strong>${minutes}</strong> min</span><span>Weekend unprogrammed</span></div></div>
+          ${week.sessions.map(renderSession).join('')}
+        </section>`;
+      }).join('');
+    }
+    function renderZones() {
+      const zones = [
+        {code:'REC',name:'Recovery',desc:'Warm-ups, cool-downs and between-rep rowing',lo:60,hi:65,color:'var(--green)'},
+        {code:'Z2',name:'Aerobic',desc:'Comfortable aerobic and post-test recovery work',lo:68,hi:75,color:'var(--blue)'},
+        {code:'Z3',name:'Tempo',desc:'Primary development intensity for this block',lo:80,hi:90,color:'var(--yellow)'},
+        {code:'THR',name:'Threshold',desc:'Sustained high-aerobic intervals',lo:95,hi:102,color:'var(--orange)'}
+      ];
+      document.getElementById('zoneGrid').innerHTML = zones.map(z => {
+        const loW = targetWatts(z.lo), hiW = targetWatts(z.hi);
+        return `<div class="zone-card" style="--zone:${z.color}"><div class="zone-code condensed">${z.code}</div><div class="zone-copy"><strong>${z.name}</strong><span>${z.desc}</span></div><div class="zone-values"><strong>${Math.round(loW)}–${Math.round(hiW)} W</strong><span>${formatSplit(splitFromWatts(loW))}–${formatSplit(splitFromWatts(hiW))}/500 m</span></div></div>`;
+      }).join('');
+      const used = [60,65,68,70,72,73,80,82,83,84,85,86,87,88,95,98,102];
+      document.getElementById('keyPowers').innerHTML = used.map(pct => {
+        const watts = targetWatts(pct);
+        return `<div class="power-row"><span>${pct}% RP20</span><strong>${formatSplit(splitFromWatts(watts))}/500 m · ${Math.round(watts)} W</strong></div>`;
+      }).join('');
+    }
+    function renderHome() {
+      const currentSplit = formatSplit(splitFromWatts(state.rp20Watts));
+      document.getElementById('homeSplit').textContent = `${currentSplit}/500 m`;
+      document.getElementById('homeWatts').textContent = `${Math.round(state.rp20Watts)} W`;
+      document.getElementById('rpBadge').innerHTML = `RP20: ${currentSplit}<small>${Math.round(state.rp20Watts)} W · edit</small>`;
+      document.getElementById('weekList').innerHTML = PROGRAM.map(week => {
+        const completed = week.sessions.filter(s=>state.done[s.id]).length;
+        const pct = completed / week.sessions.length * 100;
+        return `<button class="week-row" type="button" onclick="go('${week.id}')"><span class="week-num condensed">W${week.week}</span><span class="week-info"><strong>${week.label}</strong><span>${completed}/${week.sessions.length} complete · ${week.sessions.reduce((s,x)=>s+x.total,0)} min</span></span><span class="mini-track"><span class="mini-fill" style="display:block;width:${pct}%"></span></span></button>`;
+      }).join('');
+    }
+    function updateProgress() {
+      const sessions = allSessions();
+      const completed = sessions.filter(s=>state.done[s.id]);
+      const pct = Math.round(completed.length / sessions.length * 100);
+      document.getElementById('doneCount').textContent = completed.length;
+      document.getElementById('minutesDone').textContent = completed.reduce((sum,s)=>sum+s.total,0);
+      document.getElementById('percentDone').textContent = `${pct}%`;
+      document.getElementById('globalProgress').style.width = `${pct}%`;
+      PROGRAM.forEach(week => {
+        const tab = document.querySelector(`.tab[data-page="${week.id}"]`);
+        tab?.classList.toggle('complete',week.sessions.every(s=>state.done[s.id]));
+      });
+      renderHome();
+    }
+    function rerenderDynamic() {
+      const active = document.querySelector('.page.active')?.id.replace('page-','') || 'home';
+      renderWeekPages();
+      renderZones();
+      updateProgress();
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById(`page-${active}`)?.classList.add('active');
+    }
+    function toggleDone(id) {
+      if (state.done[id]) delete state.done[id]; else state.done[id] = true;
+      persist();
+      rerenderDynamic();
+    }
+    function toggleDetails(id) {
+      const button = document.getElementById(`toggle-${id}`);
+      const panel = document.getElementById(`details-${id}`);
+      const open = !panel.classList.contains('open');
+      button.classList.toggle('open',open); panel.classList.toggle('open',open); button.setAttribute('aria-expanded',String(open));
+    }
+    function go(pageId, tab) {
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      document.querySelectorAll('.nav-button').forEach(n=>n.classList.remove('active'));
+      document.getElementById(`page-${pageId}`)?.classList.add('active');
+      const targetTab = tab || document.querySelector(`.tab[data-page="${pageId}"]`);
+      targetTab?.classList.add('active'); targetTab?.scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+      if (pageId === 'home') document.getElementById('nav-home').classList.add('active');
+      if (pageId === 'zones') document.getElementById('nav-zones').classList.add('active');
+      window.scrollTo({top:0,behavior:'smooth'});
+    }
+    function goNext() {
+      const next = allSessions().find(s=>!state.done[s.id]);
+      if (!next) return go('w4');
+      const week = PROGRAM.find(w=>w.sessions.some(s=>s.id===next.id));
+      go(week.id);
+      setTimeout(()=>document.getElementById(`card-${next.id}`)?.scrollIntoView({behavior:'smooth',block:'center'}),180);
+      document.getElementById('nav-next').classList.add('active');
+    }
+    function openRP20() {
+      const split = splitFromWatts(state.rp20Watts);
+      document.getElementById('rpMin').value = Math.floor(split/60);
+      document.getElementById('rpSec').value = (split%60).toFixed(1);
+      updateRPPreview();
+      document.getElementById('rpModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeRP20(event) {
+      if (event && event.target !== document.getElementById('rpModal')) return;
+      document.getElementById('rpModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+    function modalSplit() {
+      return Number(document.getElementById('rpMin').value || 0)*60 + Number(document.getElementById('rpSec').value || 0);
+    }
+    function setModalSplit(total) {
+      const safe = Math.max(75,Math.min(180,total));
+      document.getElementById('rpMin').value = Math.floor(safe/60);
+      document.getElementById('rpSec').value = (safe%60).toFixed(1);
+      updateRPPreview();
+    }
+    function adjustSplit(delta) { setModalSplit(modalSplit()+delta); }
+    function updateRPPreview() {
+      const split = modalSplit();
+      if (!Number.isFinite(split) || split < 75 || split > 180) {
+        document.getElementById('rpPreview').innerHTML = '<div style="grid-column:1/-1"><strong>Enter a valid split</strong></div>';
+        return;
+      }
+      const watts = wattsFromSplit(split);
+      const previewTarget = pct => formatSplit(splitFromWatts(watts*pct/100));
+      document.getElementById('rpPreview').innerHTML = `<div><span>RP20 power</span><strong>${Math.round(watts)} W</strong></div><div><span>Zone 3 · 85%</span><strong>${previewTarget(85)}</strong></div><div><span>Threshold · 100%</span><strong>${previewTarget(100)}</strong></div>`;
+    }
+    function saveRP20() {
+      const split = modalSplit();
+      if (!Number.isFinite(split) || split < 75 || split > 180) return;
+      state.rp20Watts = wattsFromSplit(split);
+      persist(); closeRP20(); rerenderDynamic();
+    }
+    function resetProgress() {
+      if (!confirm('Reset all completed-session ticks? Your RP20 will be kept.')) return;
+      state.done = {}; persist(); rerenderDynamic();
+    }
+
+    loadState();
+    renderWeekPages();
+    renderZones();
+    updateProgress();
+  </script>
+</body>
+</html>
